@@ -6,6 +6,7 @@ Fremdverlinkungen beziehen sich dabei auf Seiten, die kein Teil der übergebenen
 ## Requirements
 * Python 3.6.4
 * s. [requirements.txt](requirements.txt)
+* Zusätzlich muss ein lxml-Parser installiert werden (`pip install lxml`)
 
 # Konzept
 Folgendes Bild verdäutlicht den Ablauf des Algorithmus:<br>
