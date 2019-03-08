@@ -74,8 +74,3 @@ class Graph(object):
         nx.draw_networkx_edges(g, pos, style="dashed", alpha=0.1, arrows=True)  
         nx.draw_networkx_edge_labels(g, pos, edge_labels=self.edge_labels)
         plt.show()
-
-file = "../../results/breitbart.anl"
-graph = Graph()
-graph.load(file, minRefs=6, maxRefs=100)
-graph.draw(ntpath.basename(file).split(".")[0])

@@ -1,10 +1,7 @@
 import json, sys, argparse
 from components.Crawler import Crawler
-# from components.Graph import Graph
 from util.URL import *
 from os.path import join
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extrahiere referenzierte Webseiten bezüglich einer Seite.')
