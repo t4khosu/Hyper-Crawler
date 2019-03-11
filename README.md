@@ -1,30 +1,30 @@
 # HyperCrawler
 
-In diesem Projekt geht es darum, von einer URL ausgehend so viele Fremdverlinkungen wie möglich zu finden.<br>
-Fremdverlinkungen beziehen sich dabei auf Seiten, die kein Teil der übergebenen Domäne sind.
+Ziel dieses Projekts ist es, ausgehend von einer gegebenen URL *A*, alle Fremdverlinkungen zu finden.<br>
+Fremdverlinkungen bezeichnen Webseiten, deren URLs kein Teil der Domäne von *A* sind.
 
 ## Requirements
 * Python 3.6.4
-* s. [requirements.txt](requirements.txt)
+* [requirements.txt](requirements.txt) (Installation mit `pip install -r requirements.txt`)
 
-# Konzept
-Folgendes Bild verdäutlicht den Ablauf des Algorithmus:<br>
+# Idee
+Algorithmus:<br>
 ![alt text](res/tree.png "Tree Structure for homepages")<br>
 * HP: Homepage
 * (m, n): m = Baumtiefe (depth), n = Position in der aktuellen Schicht
 * [z]: Ablaufschritte im Algorithmus
 
-Ausgehend von der Wurzel, werden alle Verlinkungen auf der Seite gesucht: \<a\>...\</a\>. Dabei werden Referenzen, die sich auf andere Seiten bzw. die eigene Domäne beziehen voneinander differenziert. Anschließend werden alle gefundenen Selbstreferenzen mittels Breitensuche nach neuen Verlinkungen abgesucht.<br>
-Da Verlinkungen sehr tief reichen können, hat sich keine Tiefensuche angeboten. Weiterhin sollte die Suchtiefe nicht zu groß sein, da manche Seiten sehr viele Verlinkungen besitzen können.
+Ausgehend von der Wurzel, werden alle Verlinkungen [U_1, ..., U_N] auf Seite *A* gesucht. Verlinkungen zeichnen sich durch <a>-Tags aus. 
+Referenzen auf die Domäne von *A* und fremde Adressen werden getrennt voneinander gespeichert: A_{selbst}, A_{fremd}.  Anschließend werden Selbstreferenzen in A_{selbst} mit Breitensuche nach neuen Verlinkungen durchsucht.<br>
+Für große Webseiten sollte die Suchtiefe nicht zu groß gewählt werden, da manche Seiten mehrere tausende Eigenverlinkungen aufweißen können.
 
 ## Ergebnisse
-Als Ergebnis erhält man eine .log-Datei und eine .anl-Datei (analyze). Im Log werden alle gefundenen Links gespeichert. In der Analyse-Datei werden Domänen voneinander getrennt und die Menge an Referenzen aufsteigend sortiert. Im Folgenden sind Beispiele für https://naralva.org.<br>
+Eine .log- und eine .anl-Datei (analyze). Der Log dient dem Zwischenspeichern aller Ergebnisse, um die Folgen fataler Fehler zu minimieren. In der Analyse-Datei werden Fremddomänen voneinander getrennt und aufsteigend nach Menge der Verlinkungen sortiert. Beispiel: https://naralva.org.<br>
 
 ### [naralva.log](results/logs/naralva.log) [naralva.anl](results/naralva.anl)
 
-Seiten, auf denen Fremdverlinkungen gefunden wurden, werden auch gespeichert. Die Log-Datei dient während der Informationsextraktion eldiglich dazu, alle N Schritte die gefundenen Daten zu sichern, falls Fehler oder ein Systemabsturz geschehen.<br>
 
-Ergbenisse in .anl-Dateien lassen sich auch als Graph visualisieren:
+Ergbenisse der .anl-Datei lassen sich als Graph visualisieren:
 ![alt text](res/naralva[1_bis_-1].png "Fremdverlinkungen von naralva.org aus")<br>
-Umso größer die Knoten sind, desto mehr Verlinkungen existieren.<br>
-<b>WICHTIG:</b> Verlinkungen werden in einem Set gespeichert. D.h. Duplikate werden nicht betrachtet. Falls es zu einer Seite H also N verlinkungen gibt, dann unterscheiden sich diese N Verlinkungen alle voneinander.
+* Größerer Knoten =  mehr Verlinkungen
+* Verlinkungen werden in Sets gespeichert, d.h. Duplikate fallen weg. Dadurch wird immer nur die Menge __unterschiedlicher__ Referenzen betrachtet.
