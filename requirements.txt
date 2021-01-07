@@ -4,7 +4,7 @@ chardet==3.0.4
 cycler==0.10.0
 decorator==4.3.2
 idna==2.6
-lxml==4.3.2
+lxml==4.6.2
 matplotlib==2.1.2
 networkx==1.11
 numpy==1.16.2
