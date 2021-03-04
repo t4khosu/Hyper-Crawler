@@ -13,15 +13,18 @@ This algorithm intreprets any given site as a node of a big tree. Each node can 
 
 ![alt text](res/tree.png "Tree Structure for homepages")
 
-* HP: Homepage
+* HP: homepage
 * (m, n): m = depth, n = position in layer
 * \[z\]: time step visited --> breadth-first search, BFS
 
-Ausgehend von der Wurzel, werden alle Verlinkungen [U_1, ..., U_N] auf Seite *A* gesucht. Verlinkungen zeichnen sich durch <a>-Tags aus. 
-Referenzen auf die Domäne von *A* und fremde Adressen werden getrennt voneinander gespeichert: A_{selbst}, A_{fremd}.  Anschließend werden Selbstreferenzen in A_{selbst} mit Breitensuche nach neuen Verlinkungen durchsucht.<br>
-Für große Webseiten sollte die Suchtiefe nicht zu groß gewählt werden, da manche Seiten mehrere tausende Eigenverlinkungen aufweißen können.
+A root can be any user defined domain `d`. At first all hyperrefs defined by \<a\>...\</a\> from `d`'s homepage are collected.
+If a found site contains the same domain `d`, the algorithm will run again for this site. If not, the site's URL gets stored.
+However, if the site was already checked, it won't be checked again.
 
-## Ergebnisse
+Since some domains contain thousands of references, the depth of this tree can be specified.
+
+
+## Result
 Eine .log- und eine .anl-Datei (analyze). Der Log dient dem Zwischenspeichern aller Ergebnisse, um die Folgen fataler Fehler zu minimieren. In der Analyse-Datei werden Fremddomänen voneinander getrennt und aufsteigend nach Menge der Verlinkungen sortiert. Beispiel: https://naralva.org.<br>
 
 ### [naralva.log](results/logs/naralva.log) [naralva.anl](results/naralva.anl)
