@@ -1,18 +1,21 @@
-# HyperCrawler
+# Hyper Crawler
 
-Ziel dieses Projekts ist es, ausgehend von einer gegebenen URL *A*, alle Fremdverlinkungen zu finden.<br>
-Fremdverlinkungen bezeichnen Webseiten, deren URLs kein Teil der Domäne von *A* sind.
+Have you ever wondered, what kind of websites a specific domain references most often?
+Especially in a political context it can be useful to find out what soruces a site primarely relies on.
+Therefore I implemented my own crawler and visualization tool: **Hyper Crawler**
 
-## Requirements
-* Python 3.6.4
-* [requirements.txt](requirements.txt) (Installation mit `pip install -r requirements.txt`)
+## Tools and Requirements
+* Python >= 3.6.4
+* [requirements.txt](requirements.txt) (installation: `pip install -r requirements.txt`)
 
-# Idee
-Algorithmus:<br>
-![alt text](res/tree.png "Tree Structure for homepages")<br>
+## Concept
+This algorithm intreprets any given site as a node of a big tree. Each node can have many connections to different child sites (edges). Since references to higher nodes are not important, references to already seen sites get ignored. The following image contains a simple tree with root HP:
+
+![alt text](res/tree.png "Tree Structure for homepages")
+
 * HP: Homepage
-* (m, n): m = Baumtiefe (depth), n = Position in der aktuellen Schicht
-* [z]: Ablaufschritte im Algorithmus
+* (m, n): m = depth, n = position in layer
+* \[z\]: time step visited --> breadth-first search, BFS
 
 Ausgehend von der Wurzel, werden alle Verlinkungen [U_1, ..., U_N] auf Seite *A* gesucht. Verlinkungen zeichnen sich durch <a>-Tags aus. 
 Referenzen auf die Domäne von *A* und fremde Adressen werden getrennt voneinander gespeichert: A_{selbst}, A_{fremd}.  Anschließend werden Selbstreferenzen in A_{selbst} mit Breitensuche nach neuen Verlinkungen durchsucht.<br>
