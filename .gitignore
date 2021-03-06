@@ -89,7 +89,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
+hyper_crawler/.env
 .venv
 env/
 venv/
@@ -119,3 +119,5 @@ dmypy.json
 !results/logs/naralva.log
 results/
 !results/naralva.anl
+
+.idea

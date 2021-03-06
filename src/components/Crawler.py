@@ -1,9 +1,12 @@
-import requests, re, sys, os
+from os.path import join, exists
+
+import os
+import requests
+from bs4 import BeautifulSoup
 from tqdm import tqdm
-from bs4 import BeautifulSoup, SoupStrainer
-from os.path import dirname as dir, join, exists
-from util.URL import *
 from util.Concat import dictConcat
+from util.URL import *
+
 
 class Crawler(object):
     def __init__(self, domain, parameters, resultDir):
@@ -16,11 +19,11 @@ class Crawler(object):
 
         self.ignoredExtensions = parameters["ignore"]
         self.headers = parameters["headers"]
-        self.logger = parameters["logger"]       
+        self.logger = parameters["logger"]
 
         self.netloc = getNetloc(self.domain)
         self.secondLevelDomain = getSecondLevelDomain(self.domain)
-        
+
         self.visited = set([])
         self.selfReferences = set([domain])
         self.foreignReferences = {}
@@ -45,15 +48,13 @@ class Crawler(object):
             for url in self.selfReferences:
                 if url not in self.visited:
                     if self.logger["active"] and len(self.visited) % self.logger["steps"] == 0:
-                        print(">>> Stored")
                         self.writeLog(self.logDir)
-                    print("Depth {} : {} [Visited: {}, self-references: {}, new self-references: {}, foreign-references: {}]".format(depth, url, len(self.visited), len(self.selfReferences), len(selfReferences), len(self.foreignReferences)))
                     self.visited.add(url)
 
                     newSelfReferences, newForeignReferences = self.crawlSite(url)
                     selfReferences = selfReferences.union(newSelfReferences)
                     self.foreignReferences = dictConcat(self.foreignReferences, newForeignReferences)
-            depth+=1
+            depth += 1
             self.selfReferences = self.selfReferences.union(selfReferences)
         self.writeLog(self.logDir)
         self.writeOrderedLog("../results/")
@@ -113,7 +114,7 @@ class Crawler(object):
                 fOut.write('\n')
             for own in self.visited:
                 fOut.write("SELF||" + own + "\n")
-    
+
     def load(self):
         """ Load a log file """
         with open(join(self.logDir, self.secondLevelDomain + ".log"), 'r') as fIn:
@@ -133,7 +134,7 @@ class Crawler(object):
 
         First each individual netloc is extracted.
         Afterwards for each netloc the found urls are stored as list.
-        """ 
+        """
         mapping = {}
         for ref in self.foreignReferences:
             domain = getNetloc(ref)
@@ -142,7 +143,7 @@ class Crawler(object):
             else:
                 mapping[domain].append(ref)
 
-        sorted_mapping = sorted([(k,len(v)) for k,v in mapping.items()], key=lambda x: x[1])
+        sorted_mapping = sorted([(k, len(v)) for k, v in mapping.items()], key=lambda x: x[1])
         keys = [t[0] for t in sorted_mapping]
         with open(join(dir, self.secondLevelDomain + ".anl"), 'w') as fOut:
             fOut.write("domain\t{}\n".format(self.domain))
