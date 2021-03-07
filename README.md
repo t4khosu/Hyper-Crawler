@@ -34,3 +34,14 @@ Ergbenisse der .anl-Datei lassen sich als Graph visualisieren:
 ![alt text](res/naralva[1_bis_-1].png "Fremdverlinkungen von naralva.org aus")<br>
 * Größerer Knoten =  mehr Verlinkungen
 * Verlinkungen werden in Sets gespeichert, d.h. Duplikate fallen weg. Dadurch wird immer nur die Menge __unterschiedlicher__ Referenzen betrachtet.
+
+## Examples
+
+Political sites can can lead to some interesting results, for instance:
+* https://www.acpeds.org
+* https://www.frc.org
+* https://www.nrlc.org
+* https://eagleforum.org
+* https://naralva.org
+
+I tested this tool for *acpeds* with a search depth of 3.

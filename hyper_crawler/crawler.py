@@ -23,8 +23,9 @@ class Crawler:
         self.foreign = []
 
     def start_session(self, *, connect, backoff_factor):
-        self.session = requests.Session()
         adapter = HTTPAdapter(max_retries=Retry(connect=connect, backoff_factor=backoff_factor))
+
+        self.session = requests.Session()
         self.session.mount('http://', adapter)
         self.session.mount('https://', adapter)
 
@@ -62,6 +63,9 @@ class Crawler:
         foreign_references = []
         self_references = set()
 
+        if self.session is None:
+            raise Exception('There is no session initialized.')
+
         response = self.session.get(url=url, headers=settings.REQUEST_HEADERS)
         time.sleep(1.5)
 
@@ -77,9 +81,10 @@ class Crawler:
         return self_references, foreign_references
 
     def serialized(self):
-        result = {'root': self.domain, 'depth': self.depth, 'visited': list(self.visited), 'foreign': self.foreign}
-
-        return result
+        return {
+            'root': self.domain, 'depth': self.depth, 'visited': list(self.visited),
+            'foreign': self.foreign, 'not_visited': self.nodes
+        }
 
     def __is_foreign_reference(self, href):
         other_netloc = urlparse(href).netloc
