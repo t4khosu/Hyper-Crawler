@@ -1,13 +1,9 @@
-import time
+import asyncio
 from urllib.parse import urlparse
 
-import requests
+import aiohttp
 from bs4 import BeautifulSoup
-from requests.adapters import HTTPAdapter
 from tqdm import tqdm
-from urllib3 import Retry
-
-from hyper_crawler import settings
 
 
 class Crawler:
@@ -22,34 +18,27 @@ class Crawler:
         self.visited = set()
         self.foreign = []
 
-    def start_session(self, *, connect, backoff_factor):
-        adapter = HTTPAdapter(max_retries=Retry(connect=connect, backoff_factor=backoff_factor))
-
-        self.session = requests.Session()
-        self.session.mount('http://', adapter)
-        self.session.mount('https://', adapter)
-
-    def run(self):
+    async def run(self):
         actual_depth = 0
 
         while actual_depth < self.depth:
             print(f"Layer: {actual_depth}")
-            self.check_and_update_nodes()
             actual_depth += 1
 
-    def check_and_update_nodes(self):
+            layer_responses = await self.__fetch_requests()
+            self.__evaluate_responses(layer_responses)
+
+    def __evaluate_responses(self, responses):
         new_nodes = set()
 
-        for node in tqdm(self.nodes):
-            self_references, foreign_references = self.crawl(node)
-            self.visited.add(node)
-
+        for url, response in responses:
+            self_references, foreign_references = self.__evaluate_response(url, response)
             self.foreign.extend(foreign_references)
             new_nodes = new_nodes.union(self_references)
 
         self.nodes = new_nodes - self.visited
 
-    def crawl(self, url):
+    def __evaluate_response(self, url, response_text):
         """Crawl a single URL and collect all references
 
         Args:
@@ -63,16 +52,7 @@ class Crawler:
         foreign_references = []
         self_references = set()
 
-        if self.session is None:
-            raise Exception('There is no session initialized.')
-
-        response = self.session.get(url=url, headers=settings.REQUEST_HEADERS)
-        time.sleep(1.5)
-
-        if not response.status_code == 200:
-            return self_references, foreign_references
-
-        for href in Crawler.__references_generator(response):
+        for href in Crawler.__references_generator(url, response_text):
             if self.__is_foreign_reference(href):
                 foreign_references.append(href)
             else:
@@ -83,16 +63,22 @@ class Crawler:
     def serialized(self):
         return {
             'root': self.domain, 'depth': self.depth, 'visited': list(self.visited),
-            'foreign': self.foreign, 'not_visited': self.nodes
+            'foreign': self.foreign, 'not_visited': list(self.nodes)
         }
 
     def __is_foreign_reference(self, href):
         other_netloc = urlparse(href).netloc
         return other_netloc != self.netloc
 
+    async def __fetch_requests(self):
+        async with aiohttp.ClientSession() as session:
+            responses = [await self.__fetch(node, session) for node in tqdm(self.nodes)]
+
+        return responses
+
     @staticmethod
-    def __references_generator(response):
-        soup = BeautifulSoup(response.text, "lxml")
+    def __references_generator(url, response_text):
+        soup = BeautifulSoup(response_text, "lxml")
 
         for a_tag in soup.find_all('a', href=True):
             href = a_tag['href']
@@ -101,7 +87,7 @@ class Crawler:
                 continue
 
             if href[0] == '/':
-                href = response.url + href[1:]
+                href = url + href
 
             if href[-1] == '/':
                 href = href[:-1]
@@ -110,3 +96,11 @@ class Crawler:
                 continue
 
             yield href
+
+    @staticmethod
+    async def __fetch(url, session):
+        async with session.get(url) as resp:
+            response_text = await resp.text()
+            await asyncio.sleep(1 / 5)
+
+            return url, response_text

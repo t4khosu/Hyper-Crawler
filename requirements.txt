@@ -1,4 +1,4 @@
-beautifulsoup4>=4.7.1
+pip install aiohttpbeautifulsoup4>=4.7.1
 certifi>=2018.11.29
 chardet>=3.0.4
 cycler>=0.10.0
