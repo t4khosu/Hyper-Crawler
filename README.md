@@ -50,17 +50,13 @@ If the referenced site does not contain the `-r` domain, this site will not get 
 
 ## Visualisation
 
-![alt text](img/naralva[1_bis_-1].png)<br>
-* Größerer Knoten =  mehr Verlinkungen
-* Verlinkungen werden in Sets gespeichert, d.h. Duplikate fallen weg. Dadurch wird immer nur die Menge __unterschiedlicher__ Referenzen betrachtet.
+The visualisation plots the top 50 most often occuring netlocs. The following example uses https://www.frc.org as root, depth = 3.
+![alt text](img/www-frc-org.png)
 
-## Examples
+## Sites I checked with this tool
 
-Political sites can can lead to some interesting results, for instance:
 * https://www.acpeds.org
 * https://www.frc.org
 * https://www.nrlc.org
 * https://eagleforum.org
 * https://naralva.org
-
-I tested this tool for *acpeds* with a search depth of 3.

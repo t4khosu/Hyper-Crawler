@@ -62,7 +62,7 @@ def plot(args):
 
     pos = nx.spring_layout(g, k=0.85, iterations=200)
     nx.draw_networkx_nodes(g, pos, node_size=sizes, alpha=0.4)
-    nx.draw_networkx_labels(g, pos, labels, font_weight="normal", font_size=6)
+    nx.draw_networkx_labels(g, pos, labels, font_weight="normal", font_size=8)
     nx.draw_networkx_edges(g, pos, style="dashed", alpha=0.1, arrows=True)
     nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
     plt.show()
