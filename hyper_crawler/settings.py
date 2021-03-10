@@ -8,8 +8,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = Env()
 Env.read_env()
 
-IGNORED_EXTENSIONS = env.list('IGNORED_EXTENSIONS', cast=str)
-OUTPUT_DIR = env.str('OUTPUT_DIR')
+IGNORED_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"]
+OUTPUT_DIR = env.str("OUTPUT_DIR")
 Path(OUTPUT_DIR).mkdir(exist_ok=True)
 
 REQUEST_HEADERS = {

@@ -1,9 +1,13 @@
 import asyncio
+import time
 from urllib.parse import urlparse
 
 import aiohttp
+from aiohttp import client_exceptions
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+
+from hyper_crawler import settings
 
 
 class Crawler:
@@ -19,6 +23,11 @@ class Crawler:
         self.foreign = []
 
     async def run(self):
+        """Crawl a given domain by collection sub-domains and crawling these, too.
+
+        How many sub-domains get crawled depends on the `self.depth` parameter.
+        """
+
         actual_depth = 0
 
         while actual_depth < self.depth:
@@ -32,23 +41,15 @@ class Crawler:
         new_nodes = set()
 
         for url, response in responses:
-            self_references, foreign_references = self.__evaluate_response(url, response)
+            self_references, foreign_references = self.__evaluate_response(
+                url, response
+            )
             self.foreign.extend(foreign_references)
             new_nodes = new_nodes.union(self_references)
 
         self.nodes = new_nodes - self.visited
 
     def __evaluate_response(self, url, response_text):
-        """Crawl a single URL and collect all references
-
-        Args:
-            url (:obj:`str`)
-
-        Returns:
-            tuple of a set and list: The set contains all self references and the list all references
-                to other domains
-        """
-
         foreign_references = []
         self_references = set()
 
@@ -61,10 +62,23 @@ class Crawler:
         return self_references, foreign_references
 
     def serialized(self):
+        """Create a serialized dict of `self`"""
+
         return {
-            'root': self.domain, 'depth': self.depth, 'visited': list(self.visited),
-            'foreign': self.foreign, 'not_visited': list(self.nodes)
+            "root": self.domain,
+            "depth": self.depth,
+            "visited": list(self.visited),
+            "foreign": self.foreign,
+            "not_visited": list(self.nodes),
         }
+
+    def generate_filename(self):
+        return (
+                self.netloc.replace(".", "-")
+                + "-"
+                + time.strftime("%Y%m%d-%H%M%S")
+                + ".json"
+        )
 
     def __is_foreign_reference(self, href):
         other_netloc = urlparse(href).netloc
@@ -80,27 +94,40 @@ class Crawler:
     def __references_generator(url, response_text):
         soup = BeautifulSoup(response_text, "lxml")
 
-        for a_tag in soup.find_all('a', href=True):
-            href = a_tag['href']
+        for a_tag in soup.find_all("a", href=True):
+            href = a_tag["href"]
 
             if not href:
                 continue
 
-            if href[0] == '/':
+            if href[0] == "/":
                 href = url + href
 
-            if href[-1] == '/':
+            if href[-1] == "/":
                 href = href[:-1]
 
-            if href[:4] != 'http':
+            if any(
+                    "." + extension in href.lower()
+                    for extension in settings.IGNORED_EXTENSIONS
+            ):
+                continue
+
+            if href[:4] != "http":
                 continue
 
             yield href
 
     @staticmethod
     async def __fetch(url, session):
-        async with session.get(url) as resp:
-            response_text = await resp.text()
-            await asyncio.sleep(1 / 5)
+        try:
+            async with session.get(url) as resp:
+                response_text = await resp.text()
+                await asyncio.sleep(1 / 5)
 
-            return url, response_text
+                return url, response_text
+        except client_exceptions.ClientConnectorSSLError as ssl_error:
+            print(f"SSL Error {ssl_error}")
+        except Exception as e:
+            print(f"Unknown Exception occured: {e}")
+
+        return url, ""
