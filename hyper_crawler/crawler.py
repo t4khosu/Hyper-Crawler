@@ -40,11 +40,12 @@ class Crawler:
     def __evaluate_responses(self, responses):
         new_nodes = set()
 
-        for url, response in responses:
+        for url, response in tqdm(responses):
             self_references, foreign_references = self.__evaluate_response(
                 url, response
             )
             self.foreign.extend(foreign_references)
+            self.visited.add(url)
             new_nodes = new_nodes.union(self_references)
 
         self.nodes = new_nodes - self.visited
