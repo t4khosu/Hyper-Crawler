@@ -45,21 +45,34 @@ async def crawl(args):
 
 
 def plot(args):
-    input_path = os.path.join(settings.OUTPUT_DIR, args.input_file)
-
-    try:
-        with open(input_path, 'r') as file:
-            data = json.load(file)
-    except OSError as e:
-        print(e.errno)
-        return
+    with open(os.path.join(settings.OUTPUT_DIR, args.input_file), 'r') as file:
+        data = json.load(file)
 
     domain = data['root']
-    foreign_references = data['foreign']
+    nodes, labels, sizes, edges, edge_labels = __get_graph_data(domain, data['foreign'])
+
+    plt.figure(0).canvas.set_window_title(domain)
+    plt.gca().set_axis_off()
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+
+    g = nx.DiGraph()
+    g.add_nodes_from(nodes)
+    g.add_edges_from(edges)
+
+    pos = nx.spring_layout(g, k=0.85, iterations=200)
+    nx.draw_networkx_nodes(g, pos, node_size=sizes, alpha=0.4)
+    nx.draw_networkx_labels(g, pos, labels, font_weight="normal", font_size=6)
+    nx.draw_networkx_edges(g, pos, style="dashed", alpha=0.1, arrows=True)
+    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+    plt.show()
+
+
+def __get_graph_data(domain, references_list, max_nodes=50):
     netloc_counts = {}
 
-    for foreign in foreign_references:
-        netloc = urlparse(foreign).netloc
+    for ref in references_list:
+        netloc = urlparse(ref).netloc
         if netloc not in netloc_counts:
             netloc_counts[netloc] = 1
         else:
@@ -75,7 +88,7 @@ def plot(args):
     sorted_counts.sort(key=lambda x: x[1], reverse=True)
 
     node = 1
-    for (label, size) in sorted_counts[:49]:
+    for (label, size) in sorted_counts[:max_nodes - 1]:
         nodes.append(node)
         labels[node] = label
         sizes.append(size)
@@ -83,23 +96,4 @@ def plot(args):
         edge_labels[(0, node)] = size
         node += 1
 
-    print(len(nodes))
-
-    plt.figure(0).canvas.set_window_title(domain)
-
-    plt.gca().set_axis_off()
-    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-    plt.margins(0, 0)
-
-    g = nx.DiGraph()
-    g.add_nodes_from(nodes)
-    g.add_edges_from(edges)
-
-    pos = nx.spring_layout(g, k=0.85, iterations=200)
-    nx.draw_networkx_nodes(g, pos, node_size=sizes, alpha=0.4)
-    nx.draw_networkx_labels(g, pos, labels, font_weight="normal", font_size=6)
-    nx.draw_networkx_edges(g, pos, style="dashed", alpha=0.1, arrows=True)
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
-
-    print("plot")
-    plt.show()
+    return nodes, labels, sizes, edges, edge_labels

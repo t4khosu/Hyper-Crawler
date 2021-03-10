@@ -127,7 +127,7 @@ class Crawler:
 
                 return url, response_text
         except client_exceptions.ClientConnectorSSLError as ssl_error:
-            print(f"SSL Error {ssl_error}")
+            print(f"SSL Error {ssl_error}: {url}")
         except Exception as e:
             print(f"Unknown Exception occured: {e}")
 
