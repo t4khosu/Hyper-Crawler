@@ -24,12 +24,12 @@ in the same directory and setting the parameters.
 ## Usage
 Crawl a specific domain (I suggest 2 for -d if you are unsure)
 ```shell script
-python crawler.py crawl -r <domain> -d <max depth>
+python hyper.py crawl -r <domain> -d <max depth>
 ```
 
 Plot the result
 ```shell script
-python crawler.py plot -i <file name>
+python hyper.py plot -i <file name>
 ```
 
 ## Concept
