@@ -47,7 +47,6 @@ class Crawler:
             self.foreign.extend(foreign_references)
             self.visited.add(url)
             new_nodes = new_nodes.union(self_references)
-
         self.nodes = new_nodes - self.visited
 
     def __evaluate_response(self, url, response_text):

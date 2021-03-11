@@ -78,9 +78,12 @@ def __get_graph_data(domain, references_list, max_nodes=50):
         else:
             netloc_counts[netloc] += 1
 
+    min_ref = min(netloc_counts.values())
+    max_ref = max(netloc_counts.values())
+
     nodes = [0]
     labels = {0: domain}
-    sizes = [2]
+    sizes = [0]
     edges = []
     edge_labels = {}
 
@@ -91,9 +94,15 @@ def __get_graph_data(domain, references_list, max_nodes=50):
     for (label, size) in sorted_counts[:max_nodes - 1]:
         nodes.append(node)
         labels[node] = label
-        sizes.append(size)
+        sizes.append(__size_mapping(size, min_ref, max_ref))
         edges.append((0, node))
         edge_labels[(0, node)] = size
         node += 1
 
     return nodes, labels, sizes, edges, edge_labels
+
+
+def __size_mapping(x, in_min, in_max):
+    out_max = 10000
+    out_min = 100
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
